@@ -46,19 +46,38 @@ export async function load(username) {
                 if (match && match[0]) {
                     let extractedHtml = match[0];
 
-                    extractedHtml = extractedHtml.replace(
-                        /src=["'](?!http)([^"']+)["']/g, 
-                        `src="https://raw.githubusercontent.com/${username}/${repoName}/${usedBranch}/$1"`
-                    );
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = extractedHtml;
 
-                    cardElement.innerHTML = extractedHtml;
+                    const title = tempDiv.querySelectorAll('h1');
+                    title.forEach(h1 => {
+                        h1.style.display = '-webkit-box';
+                        h1.style.webkitBoxOrient = 'vertical';
+                        h1.style.webkitLineClamp = '4';
+                        h1.style.overflow = 'hidden';
+                    });
+
+                    const images = tempDiv.querySelectorAll('img');
+                    images.forEach(img => {
+                        img.src = `https://raw.githubusercontent.com/${username}/${repoName}/${usedBranch}/${img.getAttribute('src')}`;
+                    });
+
+                    const paragraphs = tempDiv.querySelectorAll('p');
+                    paragraphs.forEach(p => {
+                        p.style.display = '-webkit-box';
+                        p.style.webkitBoxOrient = 'vertical';
+                        p.style.webkitLineClamp = '4';
+                        p.style.overflow = 'hidden';
+                    });
+
+                    cardElement.appendChild(tempDiv);
                 } else {
-                    return;
+                    continue;
                 }
 
             } catch (readmeError) {
                 console.error(`Failed loading README content for ${repoName}:`, readmeError);
-                return
+                continue
             }
         }
 
